@@ -42,6 +42,7 @@ pub mod level;
 pub mod openings;
 pub mod parameters;
 pub mod simple_decoder;
+pub mod spaces;
 pub mod styling;
 pub mod typed_json;
 pub mod wall;
