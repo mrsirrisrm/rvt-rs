@@ -45,6 +45,8 @@ mod door_type_global_ids;
 mod duct_and_pipe_ports;
 #[path = "../duct_fields.rs"]
 mod duct_fields;
+#[path = "../duct_insulation.rs"]
+mod duct_insulation;
 #[path = "../duct_names.rs"]
 mod duct_names;
 #[path = "../duct_segment_shape.rs"]

@@ -37,6 +37,7 @@
 
 pub mod arc_wall;
 pub mod floor;
+pub mod insulation;
 pub mod level;
 pub mod openings;
 pub mod parameters;

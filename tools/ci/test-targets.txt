@@ -41,6 +41,7 @@ real      door_overall_sizes
 real      door_type_global_ids
 real      duct_and_pipe_ports
 real      duct_fields
+real      duct_insulation
 real      duct_names
 real      duct_segment_shape
 real      duct_segment_type_common
