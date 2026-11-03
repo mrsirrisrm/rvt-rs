@@ -41,6 +41,8 @@ mod design_options;
 mod door_overall_sizes;
 #[path = "../door_type_global_ids.rs"]
 mod door_type_global_ids;
+#[path = "../duct_accessories.rs"]
+mod duct_accessories;
 #[path = "../duct_and_pipe_ports.rs"]
 mod duct_and_pipe_ports;
 #[path = "../duct_fields.rs"]

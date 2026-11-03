@@ -313,6 +313,11 @@ pub const OST_GENERIC_MODEL: i64 = -2_000_151;
 pub const OST_LIGHTING_FIXTURES: i64 = -2_001_120;
 /// Autodesk `BuiltInCategory.OST_DuctTerminal` — air terminals.
 pub const OST_DUCT_TERMINAL: i64 = -2_008_013;
+/// Autodesk `BuiltInCategory.OST_DuctAccessory` — dampers, silencers,
+/// filters and the like, in the duct run. On the BIM4LCA housing's HVAC
+/// model (Revit 2024) the instance rule selects 162, exactly the export's
+/// accessory `Tag`s.
+pub const OST_DUCT_ACCESSORY: i64 = -2_008_016;
 /// Autodesk `BuiltInCategory.OST_FoodServiceEquipment`.
 pub const OST_FOOD_SERVICE_EQUIPMENT: i64 = -2_001_043;
 /// Autodesk `BuiltInCategory.OST_Planting`.
@@ -388,7 +393,10 @@ pub const OST_EDGE_SLAB: i64 = -2_001_392;
 /// RE-39 adds stairs with their runs, landings and stringers, and roofs.
 /// RE-40 adds slab edges, once elements in non-primary design options are
 /// left out: all 59 exported on Snowdon Towers are Revit's.
-pub const PRODUCT_RECORD_CATEGORIES: [(i64, &str); 39] = [
+///
+/// Duct accessories follow: the 162 on the BIM4LCA housing's HVAC model are
+/// its export's dampers, silencers, filters and accessory fittings.
+pub const PRODUCT_RECORD_CATEGORIES: [(i64, &str); 40] = [
     (OST_FURNITURE, "Furniture"),
     (OST_CASEWORK, "Casework"),
     (OST_PLUMBING_FIXTURES, "PlumbingFixture"),
@@ -408,6 +416,7 @@ pub const PRODUCT_RECORD_CATEGORIES: [(i64, &str); 39] = [
     (OST_GENERIC_MODEL, "GenericModel"),
     (OST_LIGHTING_FIXTURES, "LightingFixture"),
     (OST_DUCT_TERMINAL, "DuctTerminal"),
+    (OST_DUCT_ACCESSORY, "DuctAccessory"),
     (OST_FOOD_SERVICE_EQUIPMENT, "FoodServiceEquipment"),
     (OST_PLANTING, "Planting"),
     (OST_PARKING, "Parking"),
@@ -1382,7 +1391,7 @@ pub(crate) fn find_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
 /// The categories the exporter recovers instances of, with the class name
 /// each is decoded as: the architectural core plus
 /// [`PRODUCT_RECORD_CATEGORIES`].
-pub const RECOVERED_CATEGORIES: [(i64, &str); 46] = [
+pub const RECOVERED_CATEGORIES: [(i64, &str); 47] = [
     (OST_WALLS, "Wall"),
     (OST_DOORS, "Door"),
     (OST_WINDOWS, "Window"),
@@ -1409,6 +1418,7 @@ pub const RECOVERED_CATEGORIES: [(i64, &str); 46] = [
     (OST_GENERIC_MODEL, "GenericModel"),
     (OST_LIGHTING_FIXTURES, "LightingFixture"),
     (OST_DUCT_TERMINAL, "DuctTerminal"),
+    (OST_DUCT_ACCESSORY, "DuctAccessory"),
     (OST_FOOD_SERVICE_EQUIPMENT, "FoodServiceEquipment"),
     (OST_PLANTING, "Planting"),
     (OST_PARKING, "Parking"),

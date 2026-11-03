@@ -369,6 +369,14 @@ pub const MAPPINGS: &[Mapping] = &[
         ifc_type: "IFCAIRTERMINAL",
         predefined_type: None,
     },
+    // Revit's IFC2x3 export writes duct accessories as `IfcFlowController`
+    // (the NIBS Clinic); a family's own IFC class, where it sets one,
+    // would be more specific.
+    Mapping {
+        revit_class: "DuctAccessory",
+        ifc_type: "IFCFLOWCONTROLLER",
+        predefined_type: None,
+    },
     Mapping {
         revit_class: "FoodServiceEquipment",
         ifc_type: "IFCELECTRICAPPLIANCE",
