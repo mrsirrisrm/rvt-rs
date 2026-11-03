@@ -28,8 +28,10 @@ use crate::partition_pipe_axes::{BoxGrid, holds};
 use crate::{Result, RevitFile};
 use std::collections::BTreeMap;
 
-/// Releases where this layout is measured: the RE1 models.
-pub const CURVE_FIELDS_SUPPORTED_REVIT_VERSIONS: &[u32] = &[2025];
+/// Releases where this layout is measured: the RE1 models (2025), and the
+/// BIM4LCA housing's HVAC model (2024), whose 488 axis-aligned ducts' lengths
+/// are its export's to 1 mm (`tests/duct_curve_fields_2024.rs`).
+pub const CURVE_FIELDS_SUPPORTED_REVIT_VERSIONS: &[u32] = &[2024, 2025];
 
 /// Whether `revit_version` is a release this layout is measured on.
 pub fn supports_revit_version(revit_version: u32) -> bool {
