@@ -5,11 +5,13 @@
 //! `Korkeus` (a rectangular duct's width and height; 0 on a round one), in
 //! millimetres. Wherever the walk gives a duct a length, it must be the
 //! export's `Pituus` to 1 mm, and a rectangular duct's width and height its
-//! `Leveys` and `Korkeus`. On this model 515 of its 701 ducts' curve fields
-//! are found, 488 of those lie along a model axis and so have a length, and
-//! 5 are rectangular. Round ducts' diameters agree with Revit's extrusions in
-//! the export too (to 2 mm on all 484 the duct-inverse pipeline compares),
-//! but no property here carries them.
+//! `Leveys` and `Korkeus`. On this model all 701 ducts' curve fields are
+//! found (each in the duct's own data object) and all 701 have a length:
+//! along a model axis from the box, and off the axes, for a round duct, from
+//! the cylinder its connector entries prove. 6 are rectangular. Round ducts'
+//! diameters agree with Revit's extrusions in the export too (to 2 mm on the
+//! 697 the duct-inverse pipeline compares), but no property here carries
+//! them.
 //!
 //! Runs against `RVT_NORDIC_LCA_DIR` (the `.rvt` and its `.ifc`). Skips
 //! what is absent.
@@ -139,5 +141,5 @@ fn nordic_hvac_duct_lengths_and_sections_are_magicads() {
             sections += 1;
         }
     }
-    assert_eq!((sized, lengths, sections), (515, 488, 5));
+    assert_eq!((sized, lengths, sections), (701, 701, 6));
 }

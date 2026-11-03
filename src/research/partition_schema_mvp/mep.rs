@@ -554,8 +554,11 @@ pub(super) fn end_keys_field(keys: &[crate::partition_pipe_axes::EntryKey]) -> I
 /// Give each duct along one of the model's axes its two ends, the centres of
 /// its record box's faces across its length (RE-134), and the keys of the
 /// connector entries there (#847), which say which of its connectors each
-/// end is, as for a pipe. A duct whose box leaves no single length axis is
-/// given neither.
+/// end is, as for a pipe. A duct off the axes whose width is its height is
+/// given the ends of the cylinder its connector entries and box prove, as a
+/// pipe is (RE-131), with its length, when the cylinder's diameter is its
+/// width: a round duct, or a square one sloping in one plane, whose box is a
+/// cylinder's. Any other duct off the axes is given neither.
 pub(super) fn attach_duct_end_keys(
     rf: &mut RevitFile,
     revit_version: u32,
@@ -566,6 +569,7 @@ pub(super) fn attach_duct_end_keys(
         return;
     }
     let mut ends = ppa::CurveEnds::new();
+    let mut off_axis: BTreeMap<String, Vec<(u32, [f64; 6])>> = BTreeMap::new();
     for element in products
         .iter_mut()
         .filter(|element| element.class == "Duct")
@@ -587,6 +591,9 @@ pub(super) fn attach_duct_end_keys(
             })
             .collect();
         let [axis] = axes.as_slice() else {
+            if axes.is_empty() && near(width, height) {
+                off_axis.entry(stream).or_default().push((id, bbox));
+            }
             continue;
         };
         let centre = [
@@ -606,6 +613,42 @@ pub(super) fn attach_duct_end_keys(
             }
         }
         ends.entry(stream).or_default().push((id, [start, end]));
+    }
+    let bodies = ppa::scan_pipe_bodies(rf, revit_version, &off_axis).unwrap_or_default();
+    for element in products
+        .iter_mut()
+        .filter(|element| element.class == "Duct")
+    {
+        let (Some(id), Some((width, _)), Some(stream)) = (
+            element.id,
+            curve_size_from_fields(&element.fields),
+            element_source_stream(element),
+        ) else {
+            continue;
+        };
+        let Some(body) = bodies.get(&id) else {
+            continue;
+        };
+        if (2.0 * body.radius_feet - width).abs() > 2.0 * ppa::RADIUS_TOLERANCE_FEET {
+            continue;
+        }
+        for (names, point) in DUCT_ENDS_FIELDS.iter().zip([body.start, body.end]) {
+            for (name, value) in names.iter().zip(point) {
+                element
+                    .fields
+                    .push(((*name).into(), InstanceField::Float { value, size: 8 }));
+            }
+        }
+        element.fields.push((
+            DUCT_LENGTH_FIELD.into(),
+            InstanceField::Float {
+                value: body.length_feet(),
+                size: 8,
+            },
+        ));
+        ends.entry(stream)
+            .or_default()
+            .push((id, [body.start, body.end]));
     }
     let Ok(keys) = ppa::scan_pipe_end_keys(rf, revit_version, &ends) else {
         return;

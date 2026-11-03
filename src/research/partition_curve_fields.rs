@@ -29,8 +29,8 @@ use crate::{Result, RevitFile};
 use std::collections::BTreeMap;
 
 /// Releases where this layout is measured: the RE1 models (2025), and the
-/// BIM4LCA housing's HVAC model (2024), whose 488 axis-aligned ducts' lengths
-/// are its export's to 1 mm (`tests/duct_curve_fields_2024.rs`).
+/// BIM4LCA housing's HVAC model (2024), whose 701 ducts' lengths are its
+/// export's to 1 mm (`tests/duct_curve_fields_2024.rs`).
 pub const CURVE_FIELDS_SUPPORTED_REVIT_VERSIONS: &[u32] = &[2024, 2025];
 
 /// Whether `revit_version` is a release this layout is measured on.
@@ -189,6 +189,20 @@ pub fn scan_pipe_diameters(
         .collect())
 }
 
+/// Hold `fields` for `id`; fields that disagree with ones already held
+/// leave none.
+fn record(found: &mut BTreeMap<u32, Option<CurveFields>>, id: u32, fields: CurveFields) {
+    match found.get(&id) {
+        None => {
+            found.insert(id, Some(fields));
+        }
+        Some(Some(held)) if *held != fields => {
+            found.insert(id, None);
+        }
+        Some(_) => {}
+    }
+}
+
 /// The curve fields of each duct and pipe of `curves` (their record boxes, by
 /// the partition stream their records are in), by ElementId. An element whose
 /// anchor is not found, or whose fields are not a size and a type, is absent;
@@ -217,10 +231,23 @@ pub fn scan_curve_fields(
     anchor.extend_from_slice(&manager.wrapping_add(1).to_le_bytes());
     let mut found: BTreeMap<u32, Option<CurveFields>> = BTreeMap::new();
     for (stream, boxes) in curves {
-        let Ok(inflated) = rf.inflated_partition(stream) else {
+        let (Ok(inflated), Ok(objects)) = (
+            rf.inflated_partition(stream),
+            rf.memoised_partition_data_objects(stream),
+        ) else {
             continue;
         };
         let buf = inflated.bytes();
+        let ids: std::collections::BTreeSet<u32> = boxes.iter().map(|(id, _)| *id).collect();
+        // The curve whose own data object holds the anchor (B87): on the
+        // BIM4LCA housing's HVAC model (2024), Snowdon Towers HVAC (2024)
+        // and rme_advanced (2025) every duct's one anchor is in its object,
+        // and the box rule below, where it finds an owner, finds that one.
+        let enclosing = |at: usize| {
+            let i = objects.partition_point(|(p, _)| *p <= at).checked_sub(1)?;
+            let (_, object) = objects[i];
+            (object.end > at && ids.contains(&object.element_id)).then_some(object.element_id)
+        };
         let anchors: Vec<usize> = memchr::memmem::find_iter(buf, anchor.as_slice()).collect();
         if anchors.is_empty() {
             continue;
@@ -241,6 +268,12 @@ pub fn scan_curve_fields(
         // Only the windows are searched for entries: the whole stream
         // has millions of `u32 1`s, each tested against every box.
         for &at in &anchors {
+            if let Some(id) = enclosing(at) {
+                if let Some(fields) = fields_at(buf, at) {
+                    record(&mut found, id, fields);
+                }
+                continue;
+            }
             let window = &buf[at + 1..buf.len().min(at + ANCHOR_WINDOW + 4)];
             let points: Vec<[f64; 3]> = memchr::memmem::find_iter(window, &1u32.to_le_bytes())
                 .filter_map(|offset| entry_point(buf, at + 1 + offset))
@@ -259,15 +292,7 @@ pub fn scan_curve_fields(
             let Some(fields) = fields_at(buf, at) else {
                 continue;
             };
-            match found.get(id) {
-                None => {
-                    found.insert(*id, Some(fields));
-                }
-                Some(Some(held)) if *held != fields => {
-                    found.insert(*id, None);
-                }
-                Some(_) => {}
-            }
+            record(&mut found, *id, fields);
         }
     }
     Ok(found
