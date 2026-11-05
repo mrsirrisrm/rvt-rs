@@ -55,6 +55,7 @@ real      element_parameters
 real      element_records_2025
 real      family_instance_ports
 real      fitting_nominal_diameter
+real      hvac_system_classification
 real      ifc_export_overrides
 real      ifc_roundtrip
 real      invert_elevation

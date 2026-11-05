@@ -77,6 +77,8 @@ mod field_type_coverage;
 mod fitting_nominal_diameter;
 #[path = "../fuzz_regressions.rs"]
 mod fuzz_regressions;
+#[path = "../hvac_system_classification.rs"]
+mod hvac_system_classification;
 #[path = "../ifc_export_overrides.rs"]
 mod ifc_export_overrides;
 #[path = "../ifc_roundtrip.rs"]

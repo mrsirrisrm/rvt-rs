@@ -781,6 +781,11 @@ pub const FITTING_NOMINAL_DIAMETER_FIELD: &str = "m_fitting_nominal_diameter";
 /// has none (RE-162).
 pub const MEP_SYSTEM_FIELD_PREFIX: &str = "m_mep_system_";
 
+/// Prefix of the field giving an HVAC system's classification, where its
+/// type is read: the system's ElementId follows, and the field holds Revit's
+/// `MEPSystemClassification` (1 supply air, 2 return air, 3 exhaust air).
+pub const MEP_SYSTEM_CLASSIFICATION_FIELD_PREFIX: &str = "m_mep_classification_";
+
 /// Field carrying a duct's shape as IFC names it (`RECTANGULAR`, `ROUND`,
 /// `FLATOVAL`), from its type.
 // Tracker: B43.

@@ -175,6 +175,16 @@ pub(super) fn attach_mep_systems(
                 format!("{MEP_SYSTEM_FIELD_PREFIX}{}", system.id),
                 InstanceField::String(system.name.clone().unwrap_or_default()),
             ));
+            if let Some(classification) = system.classification {
+                element.fields.push((
+                    format!("{MEP_SYSTEM_CLASSIFICATION_FIELD_PREFIX}{}", system.id),
+                    InstanceField::Integer {
+                        value: i64::from(classification),
+                        signed: false,
+                        size: 4,
+                    },
+                ));
+            }
         }
     }
 }
