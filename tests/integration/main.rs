@@ -49,6 +49,8 @@ mod duct_and_pipe_ports;
 mod duct_curve_fields_2024;
 #[path = "../duct_fields.rs"]
 mod duct_fields;
+#[path = "../duct_flex_and_diagonals.rs"]
+mod duct_flex_and_diagonals;
 #[path = "../duct_insulation.rs"]
 mod duct_insulation;
 #[path = "../duct_names.rs"]

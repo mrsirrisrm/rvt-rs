@@ -601,7 +601,9 @@ pub(super) fn attach_duct_end_keys(
             })
             .collect();
         let [axis] = axes.as_slice() else {
-            if axes.is_empty() && near(width, height) {
+            // Across the plan or sloping; or no longer than it is wide, its
+            // box the same along more than one axis.
+            if near(width, height) {
                 off_axis.entry(stream).or_default().push((id, bbox));
             }
             continue;
@@ -760,8 +762,8 @@ pub(super) fn attach_connector_pairs(
                 .filter_map(|element| element.id)
                 .map(u64::from)
                 .collect();
-            let mut pairs =
-                pcp::scan_connector_pairs(rf, &ids_of(&["Duct", "Pipe"])).unwrap_or_default();
+            let mut pairs = pcp::scan_connector_pairs(rf, &ids_of(&["Duct", "FlexDuct", "Pipe"]))
+                .unwrap_or_default();
             pairs.extend(
                 pcp::scan_fitting_pairs(rf, &ids_of(&["DuctFitting", "PipeFitting"]), &everything)
                     .unwrap_or_default(),

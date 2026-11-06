@@ -43,6 +43,7 @@ real      duct_accessories
 real      duct_and_pipe_ports
 real      duct_curve_fields_2024
 real      duct_fields
+real      duct_flex_and_diagonals
 real      duct_insulation
 real      duct_names
 real      duct_segment_shape

@@ -156,15 +156,21 @@ pub fn pipe_body(bbox: [f64; 6], start: [f64; 3], end: [f64; 3]) -> Option<PipeB
     })
 }
 
-fn same_ends(a: &PipeBody, b: &PipeBody) -> bool {
-    let close = |p: [f64; 3], q: [f64; 3]| distance(p, q) <= SAME_POINT_FEET;
+fn ends_within(a: &PipeBody, b: &PipeBody, feet: f64) -> bool {
+    let close = |p: [f64; 3], q: [f64; 3]| distance(p, q) <= feet;
     (close(a.start, b.start) && close(a.end, b.end))
         || (close(a.start, b.end) && close(a.end, b.start))
 }
 
+fn same_ends(a: &PipeBody, b: &PipeBody) -> bool {
+    ends_within(a, b, SAME_POINT_FEET)
+}
+
 /// The pipe's cylinder among the points found in its box: the pair furthest
 /// apart that [`pipe_body`] accepts. `None` where no pair is accepted, or
-/// where two different cylinders of the same length are.
+/// where two different cylinders of the same length are; two whose ends are
+/// within what the box tells apart ([`BOX_TOLERANCE_FEET`]) are one, as with a
+/// second connector entry 0.001 ft off an end, and the longer is kept.
 pub fn best_pipe_body(bbox: [f64; 6], points: &[[f64; 3]]) -> Option<PipeBody> {
     let mut best: Option<PipeBody> = None;
     let mut tied = false;
@@ -177,7 +183,11 @@ pub fn best_pipe_body(bbox: [f64; 6], points: &[[f64; 3]]) -> Option<PipeBody> {
                 None => best = Some(body),
                 Some(current) => {
                     let longer = body.length_feet() - current.length_feet();
-                    if longer > LENGTH_TIE_FEET {
+                    if ends_within(&current, &body, BOX_TOLERANCE_FEET) {
+                        if longer > 0.0 {
+                            best = Some(body);
+                        }
+                    } else if longer > LENGTH_TIE_FEET {
                         best = Some(body);
                         tied = false;
                     } else if longer >= -LENGTH_TIE_FEET && !same_ends(&current, &body) {
@@ -440,4 +450,45 @@ pub fn scan_pipe_bodies(
         .into_iter()
         .filter_map(|(id, body)| body.map(|body| (id, body)))
         .collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Snowdon Towers' duct 1440960: a run across the plan, its box the
+    /// cylinder's, Ø 8 in, with a second connector entry 0.001 ft off one end.
+    const START: [f64; 3] = [-95.958_353_8, -0.123_644_0, 28.203_637_6];
+    const END: [f64; 3] = [-97.941_781_3, -4.475_878_4, 28.203_637_6];
+    const OFF_END: [f64; 3] = [-97.941_366_6, -4.474_968_4, 28.203_637_6];
+    const BOX: [f64; 6] = [
+        -98.245_101_7,
+        -4.614_109_4,
+        27.870_304_2,
+        -95.655_033_4,
+        0.014_587_1,
+        28.536_970_9,
+    ];
+
+    #[test]
+    fn an_entry_just_off_an_end_is_the_same_cylinder() {
+        let body = best_pipe_body(BOX, &[START, OFF_END, END]).expect("one cylinder");
+        assert_eq!((body.start, body.end), (START, END));
+        let body = best_pipe_body(BOX, &[START, END, OFF_END]).expect("in either order");
+        assert_eq!((body.start, body.end), (START, END));
+    }
+
+    /// The box's two diagonals: nothing says which it is.
+    #[test]
+    fn two_cylinders_of_one_length_are_neither() {
+        let square = [-99.0, -6.0, 27.87, -94.0, -1.0, 28.54];
+        let inset = 0.333_333_333 * std::f64::consts::FRAC_1_SQRT_2;
+        let corner = |x: f64, y: f64| [x, y, (square[2] + square[5]) / 2.0];
+        let (lo, hi) = (inset, 5.0 - inset);
+        let a = [corner(-99.0 + lo, -6.0 + lo), corner(-99.0 + hi, -6.0 + hi)];
+        let b = [corner(-99.0 + lo, -6.0 + hi), corner(-99.0 + hi, -6.0 + lo)];
+        assert!(pipe_body(square, a[0], a[1]).is_some());
+        assert!(pipe_body(square, b[0], b[1]).is_some());
+        assert!(best_pipe_body(square, &[a[0], a[1], b[0], b[1]]).is_none());
+    }
 }

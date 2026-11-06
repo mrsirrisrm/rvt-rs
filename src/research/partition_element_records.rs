@@ -318,6 +318,9 @@ pub const OST_DUCT_TERMINAL: i64 = -2_008_013;
 /// model (Revit 2024) the instance rule selects 162, exactly the export's
 /// accessory `Tag`s.
 pub const OST_DUCT_ACCESSORY: i64 = -2_008_016;
+/// Autodesk `BuiltInCategory.OST_FlexDuctCurves` — flexible ducts, often
+/// the last run to an air terminal.
+pub const OST_FLEX_DUCT_CURVES: i64 = -2_008_020;
 /// Autodesk `BuiltInCategory.OST_FoodServiceEquipment`.
 pub const OST_FOOD_SERVICE_EQUIPMENT: i64 = -2_001_043;
 /// Autodesk `BuiltInCategory.OST_Planting`.
@@ -396,7 +399,7 @@ pub const OST_EDGE_SLAB: i64 = -2_001_392;
 ///
 /// Duct accessories follow: the 162 on the BIM4LCA housing's HVAC model are
 /// its export's dampers, silencers, filters and accessory fittings.
-pub const PRODUCT_RECORD_CATEGORIES: [(i64, &str); 40] = [
+pub const PRODUCT_RECORD_CATEGORIES: [(i64, &str); 41] = [
     (OST_FURNITURE, "Furniture"),
     (OST_CASEWORK, "Casework"),
     (OST_PLUMBING_FIXTURES, "PlumbingFixture"),
@@ -408,6 +411,7 @@ pub const PRODUCT_RECORD_CATEGORIES: [(i64, &str); 40] = [
     (OST_CORNICES, "WallSweep"),
     (OST_DUCT_CURVES, "Duct"),
     (OST_DUCT_FITTING, "DuctFitting"),
+    (OST_FLEX_DUCT_CURVES, "FlexDuct"),
     (OST_PIPE_CURVES, "Pipe"),
     (OST_PIPE_FITTING, "PipeFitting"),
     (OST_STRUCTURAL_FRAMING, "StructuralFraming"),
@@ -1391,7 +1395,7 @@ pub(crate) fn find_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
 /// The categories the exporter recovers instances of, with the class name
 /// each is decoded as: the architectural core plus
 /// [`PRODUCT_RECORD_CATEGORIES`].
-pub const RECOVERED_CATEGORIES: [(i64, &str); 47] = [
+pub const RECOVERED_CATEGORIES: [(i64, &str); 48] = [
     (OST_WALLS, "Wall"),
     (OST_DOORS, "Door"),
     (OST_WINDOWS, "Window"),
@@ -1410,6 +1414,7 @@ pub const RECOVERED_CATEGORIES: [(i64, &str); 47] = [
     (OST_CORNICES, "WallSweep"),
     (OST_DUCT_CURVES, "Duct"),
     (OST_DUCT_FITTING, "DuctFitting"),
+    (OST_FLEX_DUCT_CURVES, "FlexDuct"),
     (OST_PIPE_CURVES, "Pipe"),
     (OST_PIPE_FITTING, "PipeFitting"),
     (OST_STRUCTURAL_FRAMING, "StructuralFraming"),
